@@ -16,7 +16,7 @@ import proto "google.golang.org/protobuf/proto"
 import twirp "github.com/twitchtv/twirp"
 import ctxsetters "github.com/twitchtv/twirp/ctxsetters"
 
-import google_protobuf1 "google.golang.org/protobuf/types/known/emptypb"
+import google_protobuf "google.golang.org/protobuf/types/known/emptypb"
 
 import bytes "bytes"
 import errors "errors"
@@ -37,13 +37,15 @@ const _ = twirp.TwirpPackageMinVersion_8_1_0
 type LandmarkAPI interface {
 	GetLandmark(context.Context, *GetLandmarkRequest) (*Landmark, error)
 
-	GetLandmarkBySlug(context.Context, *GetLandmarkBySlugRequest) (*Landmark, error)
+	GetLandmarksByStateID(context.Context, *GetLandmarksByStateIDRequest) (*GetLandmarksByStateIDResponse, error)
 
-	GetLandmarksByState(context.Context, *GetLandmarksByStateRequest) (*GetLandmarksByStateResponse, error)
+	CreateLandmark(context.Context, *CreateLandmarkRequest) (*Landmark, error)
 
-	CreateLandmark(context.Context, *CreateLandmarkRequest) (*google_protobuf1.Empty, error)
+	UpdateLandmark(context.Context, *UpdateLandmarkRequest) (*google_protobuf.Empty, error)
 
-	DeleteLandmark(context.Context, *DeleteLandmarkRequest) (*google_protobuf1.Empty, error)
+	DeleteLandmark(context.Context, *DeleteLandmarkRequest) (*google_protobuf.Empty, error)
+
+	CreateState(context.Context, *CreateStateRequest) (*CreateStateResponse, error)
 }
 
 // ===========================
@@ -52,7 +54,7 @@ type LandmarkAPI interface {
 
 type landmarkAPIProtobufClient struct {
 	client      HTTPClient
-	urls        [5]string
+	urls        [6]string
 	interceptor twirp.Interceptor
 	opts        twirp.ClientOptions
 }
@@ -80,12 +82,13 @@ func NewLandmarkAPIProtobufClient(baseURL string, client HTTPClient, opts ...twi
 	// Build method URLs: <baseURL>[<prefix>]/<package>.<Service>/<Method>
 	serviceURL := sanitizeBaseURL(baseURL)
 	serviceURL += baseServicePath(pathPrefix, "gezdimgordum.landmarkapi", "LandmarkAPI")
-	urls := [5]string{
+	urls := [6]string{
 		serviceURL + "GetLandmark",
-		serviceURL + "GetLandmarkBySlug",
-		serviceURL + "GetLandmarksByState",
+		serviceURL + "GetLandmarksByStateID",
 		serviceURL + "CreateLandmark",
+		serviceURL + "UpdateLandmark",
 		serviceURL + "DeleteLandmark",
+		serviceURL + "CreateState",
 	}
 
 	return &landmarkAPIProtobufClient{
@@ -142,26 +145,26 @@ func (c *landmarkAPIProtobufClient) callGetLandmark(ctx context.Context, in *Get
 	return out, nil
 }
 
-func (c *landmarkAPIProtobufClient) GetLandmarkBySlug(ctx context.Context, in *GetLandmarkBySlugRequest) (*Landmark, error) {
+func (c *landmarkAPIProtobufClient) GetLandmarksByStateID(ctx context.Context, in *GetLandmarksByStateIDRequest) (*GetLandmarksByStateIDResponse, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "gezdimgordum.landmarkapi")
 	ctx = ctxsetters.WithServiceName(ctx, "LandmarkAPI")
-	ctx = ctxsetters.WithMethodName(ctx, "GetLandmarkBySlug")
-	caller := c.callGetLandmarkBySlug
+	ctx = ctxsetters.WithMethodName(ctx, "GetLandmarksByStateID")
+	caller := c.callGetLandmarksByStateID
 	if c.interceptor != nil {
-		caller = func(ctx context.Context, req *GetLandmarkBySlugRequest) (*Landmark, error) {
+		caller = func(ctx context.Context, req *GetLandmarksByStateIDRequest) (*GetLandmarksByStateIDResponse, error) {
 			resp, err := c.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*GetLandmarkBySlugRequest)
+					typedReq, ok := req.(*GetLandmarksByStateIDRequest)
 					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*GetLandmarkBySlugRequest) when calling interceptor")
+						return nil, twirp.InternalError("failed type assertion req.(*GetLandmarksByStateIDRequest) when calling interceptor")
 					}
-					return c.callGetLandmarkBySlug(ctx, typedReq)
+					return c.callGetLandmarksByStateID(ctx, typedReq)
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*Landmark)
+				typedResp, ok := resp.(*GetLandmarksByStateIDResponse)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*Landmark) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*GetLandmarksByStateIDResponse) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -171,8 +174,8 @@ func (c *landmarkAPIProtobufClient) GetLandmarkBySlug(ctx context.Context, in *G
 	return caller(ctx, in)
 }
 
-func (c *landmarkAPIProtobufClient) callGetLandmarkBySlug(ctx context.Context, in *GetLandmarkBySlugRequest) (*Landmark, error) {
-	out := new(Landmark)
+func (c *landmarkAPIProtobufClient) callGetLandmarksByStateID(ctx context.Context, in *GetLandmarksByStateIDRequest) (*GetLandmarksByStateIDResponse, error) {
+	out := new(GetLandmarksByStateIDResponse)
 	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
@@ -188,26 +191,26 @@ func (c *landmarkAPIProtobufClient) callGetLandmarkBySlug(ctx context.Context, i
 	return out, nil
 }
 
-func (c *landmarkAPIProtobufClient) GetLandmarksByState(ctx context.Context, in *GetLandmarksByStateRequest) (*GetLandmarksByStateResponse, error) {
+func (c *landmarkAPIProtobufClient) CreateLandmark(ctx context.Context, in *CreateLandmarkRequest) (*Landmark, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "gezdimgordum.landmarkapi")
 	ctx = ctxsetters.WithServiceName(ctx, "LandmarkAPI")
-	ctx = ctxsetters.WithMethodName(ctx, "GetLandmarksByState")
-	caller := c.callGetLandmarksByState
+	ctx = ctxsetters.WithMethodName(ctx, "CreateLandmark")
+	caller := c.callCreateLandmark
 	if c.interceptor != nil {
-		caller = func(ctx context.Context, req *GetLandmarksByStateRequest) (*GetLandmarksByStateResponse, error) {
+		caller = func(ctx context.Context, req *CreateLandmarkRequest) (*Landmark, error) {
 			resp, err := c.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*GetLandmarksByStateRequest)
+					typedReq, ok := req.(*CreateLandmarkRequest)
 					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*GetLandmarksByStateRequest) when calling interceptor")
+						return nil, twirp.InternalError("failed type assertion req.(*CreateLandmarkRequest) when calling interceptor")
 					}
-					return c.callGetLandmarksByState(ctx, typedReq)
+					return c.callCreateLandmark(ctx, typedReq)
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*GetLandmarksByStateResponse)
+				typedResp, ok := resp.(*Landmark)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*GetLandmarksByStateResponse) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*Landmark) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -217,8 +220,8 @@ func (c *landmarkAPIProtobufClient) GetLandmarksByState(ctx context.Context, in 
 	return caller(ctx, in)
 }
 
-func (c *landmarkAPIProtobufClient) callGetLandmarksByState(ctx context.Context, in *GetLandmarksByStateRequest) (*GetLandmarksByStateResponse, error) {
-	out := new(GetLandmarksByStateResponse)
+func (c *landmarkAPIProtobufClient) callCreateLandmark(ctx context.Context, in *CreateLandmarkRequest) (*Landmark, error) {
+	out := new(Landmark)
 	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
@@ -234,26 +237,26 @@ func (c *landmarkAPIProtobufClient) callGetLandmarksByState(ctx context.Context,
 	return out, nil
 }
 
-func (c *landmarkAPIProtobufClient) CreateLandmark(ctx context.Context, in *CreateLandmarkRequest) (*google_protobuf1.Empty, error) {
+func (c *landmarkAPIProtobufClient) UpdateLandmark(ctx context.Context, in *UpdateLandmarkRequest) (*google_protobuf.Empty, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "gezdimgordum.landmarkapi")
 	ctx = ctxsetters.WithServiceName(ctx, "LandmarkAPI")
-	ctx = ctxsetters.WithMethodName(ctx, "CreateLandmark")
-	caller := c.callCreateLandmark
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateLandmark")
+	caller := c.callUpdateLandmark
 	if c.interceptor != nil {
-		caller = func(ctx context.Context, req *CreateLandmarkRequest) (*google_protobuf1.Empty, error) {
+		caller = func(ctx context.Context, req *UpdateLandmarkRequest) (*google_protobuf.Empty, error) {
 			resp, err := c.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*CreateLandmarkRequest)
+					typedReq, ok := req.(*UpdateLandmarkRequest)
 					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*CreateLandmarkRequest) when calling interceptor")
+						return nil, twirp.InternalError("failed type assertion req.(*UpdateLandmarkRequest) when calling interceptor")
 					}
-					return c.callCreateLandmark(ctx, typedReq)
+					return c.callUpdateLandmark(ctx, typedReq)
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*google_protobuf1.Empty)
+				typedResp, ok := resp.(*google_protobuf.Empty)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf1.Empty) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf.Empty) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -263,8 +266,8 @@ func (c *landmarkAPIProtobufClient) CreateLandmark(ctx context.Context, in *Crea
 	return caller(ctx, in)
 }
 
-func (c *landmarkAPIProtobufClient) callCreateLandmark(ctx context.Context, in *CreateLandmarkRequest) (*google_protobuf1.Empty, error) {
-	out := new(google_protobuf1.Empty)
+func (c *landmarkAPIProtobufClient) callUpdateLandmark(ctx context.Context, in *UpdateLandmarkRequest) (*google_protobuf.Empty, error) {
+	out := new(google_protobuf.Empty)
 	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[3], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
@@ -280,13 +283,13 @@ func (c *landmarkAPIProtobufClient) callCreateLandmark(ctx context.Context, in *
 	return out, nil
 }
 
-func (c *landmarkAPIProtobufClient) DeleteLandmark(ctx context.Context, in *DeleteLandmarkRequest) (*google_protobuf1.Empty, error) {
+func (c *landmarkAPIProtobufClient) DeleteLandmark(ctx context.Context, in *DeleteLandmarkRequest) (*google_protobuf.Empty, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "gezdimgordum.landmarkapi")
 	ctx = ctxsetters.WithServiceName(ctx, "LandmarkAPI")
 	ctx = ctxsetters.WithMethodName(ctx, "DeleteLandmark")
 	caller := c.callDeleteLandmark
 	if c.interceptor != nil {
-		caller = func(ctx context.Context, req *DeleteLandmarkRequest) (*google_protobuf1.Empty, error) {
+		caller = func(ctx context.Context, req *DeleteLandmarkRequest) (*google_protobuf.Empty, error) {
 			resp, err := c.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
 					typedReq, ok := req.(*DeleteLandmarkRequest)
@@ -297,9 +300,9 @@ func (c *landmarkAPIProtobufClient) DeleteLandmark(ctx context.Context, in *Dele
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*google_protobuf1.Empty)
+				typedResp, ok := resp.(*google_protobuf.Empty)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf1.Empty) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf.Empty) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -309,9 +312,55 @@ func (c *landmarkAPIProtobufClient) DeleteLandmark(ctx context.Context, in *Dele
 	return caller(ctx, in)
 }
 
-func (c *landmarkAPIProtobufClient) callDeleteLandmark(ctx context.Context, in *DeleteLandmarkRequest) (*google_protobuf1.Empty, error) {
-	out := new(google_protobuf1.Empty)
+func (c *landmarkAPIProtobufClient) callDeleteLandmark(ctx context.Context, in *DeleteLandmarkRequest) (*google_protobuf.Empty, error) {
+	out := new(google_protobuf.Empty)
 	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[4], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *landmarkAPIProtobufClient) CreateState(ctx context.Context, in *CreateStateRequest) (*CreateStateResponse, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "gezdimgordum.landmarkapi")
+	ctx = ctxsetters.WithServiceName(ctx, "LandmarkAPI")
+	ctx = ctxsetters.WithMethodName(ctx, "CreateState")
+	caller := c.callCreateState
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *CreateStateRequest) (*CreateStateResponse, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*CreateStateRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*CreateStateRequest) when calling interceptor")
+					}
+					return c.callCreateState(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*CreateStateResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*CreateStateResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *landmarkAPIProtobufClient) callCreateState(ctx context.Context, in *CreateStateRequest) (*CreateStateResponse, error) {
+	out := new(CreateStateResponse)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[5], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -332,7 +381,7 @@ func (c *landmarkAPIProtobufClient) callDeleteLandmark(ctx context.Context, in *
 
 type landmarkAPIJSONClient struct {
 	client      HTTPClient
-	urls        [5]string
+	urls        [6]string
 	interceptor twirp.Interceptor
 	opts        twirp.ClientOptions
 }
@@ -360,12 +409,13 @@ func NewLandmarkAPIJSONClient(baseURL string, client HTTPClient, opts ...twirp.C
 	// Build method URLs: <baseURL>[<prefix>]/<package>.<Service>/<Method>
 	serviceURL := sanitizeBaseURL(baseURL)
 	serviceURL += baseServicePath(pathPrefix, "gezdimgordum.landmarkapi", "LandmarkAPI")
-	urls := [5]string{
+	urls := [6]string{
 		serviceURL + "GetLandmark",
-		serviceURL + "GetLandmarkBySlug",
-		serviceURL + "GetLandmarksByState",
+		serviceURL + "GetLandmarksByStateID",
 		serviceURL + "CreateLandmark",
+		serviceURL + "UpdateLandmark",
 		serviceURL + "DeleteLandmark",
+		serviceURL + "CreateState",
 	}
 
 	return &landmarkAPIJSONClient{
@@ -422,26 +472,26 @@ func (c *landmarkAPIJSONClient) callGetLandmark(ctx context.Context, in *GetLand
 	return out, nil
 }
 
-func (c *landmarkAPIJSONClient) GetLandmarkBySlug(ctx context.Context, in *GetLandmarkBySlugRequest) (*Landmark, error) {
+func (c *landmarkAPIJSONClient) GetLandmarksByStateID(ctx context.Context, in *GetLandmarksByStateIDRequest) (*GetLandmarksByStateIDResponse, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "gezdimgordum.landmarkapi")
 	ctx = ctxsetters.WithServiceName(ctx, "LandmarkAPI")
-	ctx = ctxsetters.WithMethodName(ctx, "GetLandmarkBySlug")
-	caller := c.callGetLandmarkBySlug
+	ctx = ctxsetters.WithMethodName(ctx, "GetLandmarksByStateID")
+	caller := c.callGetLandmarksByStateID
 	if c.interceptor != nil {
-		caller = func(ctx context.Context, req *GetLandmarkBySlugRequest) (*Landmark, error) {
+		caller = func(ctx context.Context, req *GetLandmarksByStateIDRequest) (*GetLandmarksByStateIDResponse, error) {
 			resp, err := c.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*GetLandmarkBySlugRequest)
+					typedReq, ok := req.(*GetLandmarksByStateIDRequest)
 					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*GetLandmarkBySlugRequest) when calling interceptor")
+						return nil, twirp.InternalError("failed type assertion req.(*GetLandmarksByStateIDRequest) when calling interceptor")
 					}
-					return c.callGetLandmarkBySlug(ctx, typedReq)
+					return c.callGetLandmarksByStateID(ctx, typedReq)
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*Landmark)
+				typedResp, ok := resp.(*GetLandmarksByStateIDResponse)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*Landmark) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*GetLandmarksByStateIDResponse) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -451,8 +501,8 @@ func (c *landmarkAPIJSONClient) GetLandmarkBySlug(ctx context.Context, in *GetLa
 	return caller(ctx, in)
 }
 
-func (c *landmarkAPIJSONClient) callGetLandmarkBySlug(ctx context.Context, in *GetLandmarkBySlugRequest) (*Landmark, error) {
-	out := new(Landmark)
+func (c *landmarkAPIJSONClient) callGetLandmarksByStateID(ctx context.Context, in *GetLandmarksByStateIDRequest) (*GetLandmarksByStateIDResponse, error) {
+	out := new(GetLandmarksByStateIDResponse)
 	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
@@ -468,26 +518,26 @@ func (c *landmarkAPIJSONClient) callGetLandmarkBySlug(ctx context.Context, in *G
 	return out, nil
 }
 
-func (c *landmarkAPIJSONClient) GetLandmarksByState(ctx context.Context, in *GetLandmarksByStateRequest) (*GetLandmarksByStateResponse, error) {
+func (c *landmarkAPIJSONClient) CreateLandmark(ctx context.Context, in *CreateLandmarkRequest) (*Landmark, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "gezdimgordum.landmarkapi")
 	ctx = ctxsetters.WithServiceName(ctx, "LandmarkAPI")
-	ctx = ctxsetters.WithMethodName(ctx, "GetLandmarksByState")
-	caller := c.callGetLandmarksByState
+	ctx = ctxsetters.WithMethodName(ctx, "CreateLandmark")
+	caller := c.callCreateLandmark
 	if c.interceptor != nil {
-		caller = func(ctx context.Context, req *GetLandmarksByStateRequest) (*GetLandmarksByStateResponse, error) {
+		caller = func(ctx context.Context, req *CreateLandmarkRequest) (*Landmark, error) {
 			resp, err := c.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*GetLandmarksByStateRequest)
+					typedReq, ok := req.(*CreateLandmarkRequest)
 					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*GetLandmarksByStateRequest) when calling interceptor")
+						return nil, twirp.InternalError("failed type assertion req.(*CreateLandmarkRequest) when calling interceptor")
 					}
-					return c.callGetLandmarksByState(ctx, typedReq)
+					return c.callCreateLandmark(ctx, typedReq)
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*GetLandmarksByStateResponse)
+				typedResp, ok := resp.(*Landmark)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*GetLandmarksByStateResponse) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*Landmark) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -497,8 +547,8 @@ func (c *landmarkAPIJSONClient) GetLandmarksByState(ctx context.Context, in *Get
 	return caller(ctx, in)
 }
 
-func (c *landmarkAPIJSONClient) callGetLandmarksByState(ctx context.Context, in *GetLandmarksByStateRequest) (*GetLandmarksByStateResponse, error) {
-	out := new(GetLandmarksByStateResponse)
+func (c *landmarkAPIJSONClient) callCreateLandmark(ctx context.Context, in *CreateLandmarkRequest) (*Landmark, error) {
+	out := new(Landmark)
 	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
@@ -514,26 +564,26 @@ func (c *landmarkAPIJSONClient) callGetLandmarksByState(ctx context.Context, in 
 	return out, nil
 }
 
-func (c *landmarkAPIJSONClient) CreateLandmark(ctx context.Context, in *CreateLandmarkRequest) (*google_protobuf1.Empty, error) {
+func (c *landmarkAPIJSONClient) UpdateLandmark(ctx context.Context, in *UpdateLandmarkRequest) (*google_protobuf.Empty, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "gezdimgordum.landmarkapi")
 	ctx = ctxsetters.WithServiceName(ctx, "LandmarkAPI")
-	ctx = ctxsetters.WithMethodName(ctx, "CreateLandmark")
-	caller := c.callCreateLandmark
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateLandmark")
+	caller := c.callUpdateLandmark
 	if c.interceptor != nil {
-		caller = func(ctx context.Context, req *CreateLandmarkRequest) (*google_protobuf1.Empty, error) {
+		caller = func(ctx context.Context, req *UpdateLandmarkRequest) (*google_protobuf.Empty, error) {
 			resp, err := c.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*CreateLandmarkRequest)
+					typedReq, ok := req.(*UpdateLandmarkRequest)
 					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*CreateLandmarkRequest) when calling interceptor")
+						return nil, twirp.InternalError("failed type assertion req.(*UpdateLandmarkRequest) when calling interceptor")
 					}
-					return c.callCreateLandmark(ctx, typedReq)
+					return c.callUpdateLandmark(ctx, typedReq)
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*google_protobuf1.Empty)
+				typedResp, ok := resp.(*google_protobuf.Empty)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf1.Empty) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf.Empty) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -543,8 +593,8 @@ func (c *landmarkAPIJSONClient) CreateLandmark(ctx context.Context, in *CreateLa
 	return caller(ctx, in)
 }
 
-func (c *landmarkAPIJSONClient) callCreateLandmark(ctx context.Context, in *CreateLandmarkRequest) (*google_protobuf1.Empty, error) {
-	out := new(google_protobuf1.Empty)
+func (c *landmarkAPIJSONClient) callUpdateLandmark(ctx context.Context, in *UpdateLandmarkRequest) (*google_protobuf.Empty, error) {
+	out := new(google_protobuf.Empty)
 	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[3], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
@@ -560,13 +610,13 @@ func (c *landmarkAPIJSONClient) callCreateLandmark(ctx context.Context, in *Crea
 	return out, nil
 }
 
-func (c *landmarkAPIJSONClient) DeleteLandmark(ctx context.Context, in *DeleteLandmarkRequest) (*google_protobuf1.Empty, error) {
+func (c *landmarkAPIJSONClient) DeleteLandmark(ctx context.Context, in *DeleteLandmarkRequest) (*google_protobuf.Empty, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "gezdimgordum.landmarkapi")
 	ctx = ctxsetters.WithServiceName(ctx, "LandmarkAPI")
 	ctx = ctxsetters.WithMethodName(ctx, "DeleteLandmark")
 	caller := c.callDeleteLandmark
 	if c.interceptor != nil {
-		caller = func(ctx context.Context, req *DeleteLandmarkRequest) (*google_protobuf1.Empty, error) {
+		caller = func(ctx context.Context, req *DeleteLandmarkRequest) (*google_protobuf.Empty, error) {
 			resp, err := c.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
 					typedReq, ok := req.(*DeleteLandmarkRequest)
@@ -577,9 +627,9 @@ func (c *landmarkAPIJSONClient) DeleteLandmark(ctx context.Context, in *DeleteLa
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*google_protobuf1.Empty)
+				typedResp, ok := resp.(*google_protobuf.Empty)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf1.Empty) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf.Empty) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -589,9 +639,55 @@ func (c *landmarkAPIJSONClient) DeleteLandmark(ctx context.Context, in *DeleteLa
 	return caller(ctx, in)
 }
 
-func (c *landmarkAPIJSONClient) callDeleteLandmark(ctx context.Context, in *DeleteLandmarkRequest) (*google_protobuf1.Empty, error) {
-	out := new(google_protobuf1.Empty)
+func (c *landmarkAPIJSONClient) callDeleteLandmark(ctx context.Context, in *DeleteLandmarkRequest) (*google_protobuf.Empty, error) {
+	out := new(google_protobuf.Empty)
 	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[4], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *landmarkAPIJSONClient) CreateState(ctx context.Context, in *CreateStateRequest) (*CreateStateResponse, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "gezdimgordum.landmarkapi")
+	ctx = ctxsetters.WithServiceName(ctx, "LandmarkAPI")
+	ctx = ctxsetters.WithMethodName(ctx, "CreateState")
+	caller := c.callCreateState
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *CreateStateRequest) (*CreateStateResponse, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*CreateStateRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*CreateStateRequest) when calling interceptor")
+					}
+					return c.callCreateState(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*CreateStateResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*CreateStateResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *landmarkAPIJSONClient) callCreateState(ctx context.Context, in *CreateStateRequest) (*CreateStateResponse, error) {
+	out := new(CreateStateResponse)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[5], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -706,17 +802,20 @@ func (s *landmarkAPIServer) ServeHTTP(resp http.ResponseWriter, req *http.Reques
 	case "GetLandmark":
 		s.serveGetLandmark(ctx, resp, req)
 		return
-	case "GetLandmarkBySlug":
-		s.serveGetLandmarkBySlug(ctx, resp, req)
-		return
-	case "GetLandmarksByState":
-		s.serveGetLandmarksByState(ctx, resp, req)
+	case "GetLandmarksByStateID":
+		s.serveGetLandmarksByStateID(ctx, resp, req)
 		return
 	case "CreateLandmark":
 		s.serveCreateLandmark(ctx, resp, req)
 		return
+	case "UpdateLandmark":
+		s.serveUpdateLandmark(ctx, resp, req)
+		return
 	case "DeleteLandmark":
 		s.serveDeleteLandmark(ctx, resp, req)
+		return
+	case "CreateState":
+		s.serveCreateState(ctx, resp, req)
 		return
 	default:
 		msg := fmt.Sprintf("no handler for path %q", req.URL.Path)
@@ -905,7 +1004,7 @@ func (s *landmarkAPIServer) serveGetLandmarkProtobuf(ctx context.Context, resp h
 	callResponseSent(ctx, s.hooks)
 }
 
-func (s *landmarkAPIServer) serveGetLandmarkBySlug(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *landmarkAPIServer) serveGetLandmarksByStateID(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	header := req.Header.Get("Content-Type")
 	i := strings.Index(header, ";")
 	if i == -1 {
@@ -913,9 +1012,9 @@ func (s *landmarkAPIServer) serveGetLandmarkBySlug(ctx context.Context, resp htt
 	}
 	switch strings.TrimSpace(strings.ToLower(header[:i])) {
 	case "application/json":
-		s.serveGetLandmarkBySlugJSON(ctx, resp, req)
+		s.serveGetLandmarksByStateIDJSON(ctx, resp, req)
 	case "application/protobuf":
-		s.serveGetLandmarkBySlugProtobuf(ctx, resp, req)
+		s.serveGetLandmarksByStateIDProtobuf(ctx, resp, req)
 	default:
 		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
 		twerr := badRouteError(msg, req.Method, req.URL.Path)
@@ -923,9 +1022,9 @@ func (s *landmarkAPIServer) serveGetLandmarkBySlug(ctx context.Context, resp htt
 	}
 }
 
-func (s *landmarkAPIServer) serveGetLandmarkBySlugJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *landmarkAPIServer) serveGetLandmarksByStateIDJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	var err error
-	ctx = ctxsetters.WithMethodName(ctx, "GetLandmarkBySlug")
+	ctx = ctxsetters.WithMethodName(ctx, "GetLandmarksByStateID")
 	ctx, err = callRequestRouted(ctx, s.hooks)
 	if err != nil {
 		s.writeError(ctx, resp, err)
@@ -938,29 +1037,29 @@ func (s *landmarkAPIServer) serveGetLandmarkBySlugJSON(ctx context.Context, resp
 		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
 		return
 	}
-	reqContent := new(GetLandmarkBySlugRequest)
+	reqContent := new(GetLandmarksByStateIDRequest)
 	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
 	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
 		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
 		return
 	}
 
-	handler := s.LandmarkAPI.GetLandmarkBySlug
+	handler := s.LandmarkAPI.GetLandmarksByStateID
 	if s.interceptor != nil {
-		handler = func(ctx context.Context, req *GetLandmarkBySlugRequest) (*Landmark, error) {
+		handler = func(ctx context.Context, req *GetLandmarksByStateIDRequest) (*GetLandmarksByStateIDResponse, error) {
 			resp, err := s.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*GetLandmarkBySlugRequest)
+					typedReq, ok := req.(*GetLandmarksByStateIDRequest)
 					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*GetLandmarkBySlugRequest) when calling interceptor")
+						return nil, twirp.InternalError("failed type assertion req.(*GetLandmarksByStateIDRequest) when calling interceptor")
 					}
-					return s.LandmarkAPI.GetLandmarkBySlug(ctx, typedReq)
+					return s.LandmarkAPI.GetLandmarksByStateID(ctx, typedReq)
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*Landmark)
+				typedResp, ok := resp.(*GetLandmarksByStateIDResponse)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*Landmark) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*GetLandmarksByStateIDResponse) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -969,7 +1068,7 @@ func (s *landmarkAPIServer) serveGetLandmarkBySlugJSON(ctx context.Context, resp
 	}
 
 	// Call service method
-	var respContent *Landmark
+	var respContent *GetLandmarksByStateIDResponse
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
 		respContent, err = handler(ctx, reqContent)
@@ -980,7 +1079,7 @@ func (s *landmarkAPIServer) serveGetLandmarkBySlugJSON(ctx context.Context, resp
 		return
 	}
 	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *Landmark and nil error while calling GetLandmarkBySlug. nil responses are not supported"))
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *GetLandmarksByStateIDResponse and nil error while calling GetLandmarksByStateID. nil responses are not supported"))
 		return
 	}
 
@@ -1006,9 +1105,9 @@ func (s *landmarkAPIServer) serveGetLandmarkBySlugJSON(ctx context.Context, resp
 	callResponseSent(ctx, s.hooks)
 }
 
-func (s *landmarkAPIServer) serveGetLandmarkBySlugProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *landmarkAPIServer) serveGetLandmarksByStateIDProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	var err error
-	ctx = ctxsetters.WithMethodName(ctx, "GetLandmarkBySlug")
+	ctx = ctxsetters.WithMethodName(ctx, "GetLandmarksByStateID")
 	ctx, err = callRequestRouted(ctx, s.hooks)
 	if err != nil {
 		s.writeError(ctx, resp, err)
@@ -1020,28 +1119,28 @@ func (s *landmarkAPIServer) serveGetLandmarkBySlugProtobuf(ctx context.Context, 
 		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
 		return
 	}
-	reqContent := new(GetLandmarkBySlugRequest)
+	reqContent := new(GetLandmarksByStateIDRequest)
 	if err = proto.Unmarshal(buf, reqContent); err != nil {
 		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
 		return
 	}
 
-	handler := s.LandmarkAPI.GetLandmarkBySlug
+	handler := s.LandmarkAPI.GetLandmarksByStateID
 	if s.interceptor != nil {
-		handler = func(ctx context.Context, req *GetLandmarkBySlugRequest) (*Landmark, error) {
+		handler = func(ctx context.Context, req *GetLandmarksByStateIDRequest) (*GetLandmarksByStateIDResponse, error) {
 			resp, err := s.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*GetLandmarkBySlugRequest)
+					typedReq, ok := req.(*GetLandmarksByStateIDRequest)
 					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*GetLandmarkBySlugRequest) when calling interceptor")
+						return nil, twirp.InternalError("failed type assertion req.(*GetLandmarksByStateIDRequest) when calling interceptor")
 					}
-					return s.LandmarkAPI.GetLandmarkBySlug(ctx, typedReq)
+					return s.LandmarkAPI.GetLandmarksByStateID(ctx, typedReq)
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*Landmark)
+				typedResp, ok := resp.(*GetLandmarksByStateIDResponse)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*Landmark) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*GetLandmarksByStateIDResponse) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -1050,7 +1149,7 @@ func (s *landmarkAPIServer) serveGetLandmarkBySlugProtobuf(ctx context.Context, 
 	}
 
 	// Call service method
-	var respContent *Landmark
+	var respContent *GetLandmarksByStateIDResponse
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
 		respContent, err = handler(ctx, reqContent)
@@ -1061,187 +1160,7 @@ func (s *landmarkAPIServer) serveGetLandmarkBySlugProtobuf(ctx context.Context, 
 		return
 	}
 	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *Landmark and nil error while calling GetLandmarkBySlug. nil responses are not supported"))
-		return
-	}
-
-	ctx = callResponsePrepared(ctx, s.hooks)
-
-	respBytes, err := proto.Marshal(respContent)
-	if err != nil {
-		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
-		return
-	}
-
-	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
-	resp.Header().Set("Content-Type", "application/protobuf")
-	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
-	resp.WriteHeader(http.StatusOK)
-	if n, err := resp.Write(respBytes); err != nil {
-		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
-		twerr := twirp.NewError(twirp.Unknown, msg)
-		ctx = callError(ctx, s.hooks, twerr)
-	}
-	callResponseSent(ctx, s.hooks)
-}
-
-func (s *landmarkAPIServer) serveGetLandmarksByState(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
-	header := req.Header.Get("Content-Type")
-	i := strings.Index(header, ";")
-	if i == -1 {
-		i = len(header)
-	}
-	switch strings.TrimSpace(strings.ToLower(header[:i])) {
-	case "application/json":
-		s.serveGetLandmarksByStateJSON(ctx, resp, req)
-	case "application/protobuf":
-		s.serveGetLandmarksByStateProtobuf(ctx, resp, req)
-	default:
-		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
-		twerr := badRouteError(msg, req.Method, req.URL.Path)
-		s.writeError(ctx, resp, twerr)
-	}
-}
-
-func (s *landmarkAPIServer) serveGetLandmarksByStateJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
-	var err error
-	ctx = ctxsetters.WithMethodName(ctx, "GetLandmarksByState")
-	ctx, err = callRequestRouted(ctx, s.hooks)
-	if err != nil {
-		s.writeError(ctx, resp, err)
-		return
-	}
-
-	d := json.NewDecoder(req.Body)
-	rawReqBody := json.RawMessage{}
-	if err := d.Decode(&rawReqBody); err != nil {
-		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
-		return
-	}
-	reqContent := new(GetLandmarksByStateRequest)
-	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
-	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
-		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
-		return
-	}
-
-	handler := s.LandmarkAPI.GetLandmarksByState
-	if s.interceptor != nil {
-		handler = func(ctx context.Context, req *GetLandmarksByStateRequest) (*GetLandmarksByStateResponse, error) {
-			resp, err := s.interceptor(
-				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*GetLandmarksByStateRequest)
-					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*GetLandmarksByStateRequest) when calling interceptor")
-					}
-					return s.LandmarkAPI.GetLandmarksByState(ctx, typedReq)
-				},
-			)(ctx, req)
-			if resp != nil {
-				typedResp, ok := resp.(*GetLandmarksByStateResponse)
-				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*GetLandmarksByStateResponse) when calling interceptor")
-				}
-				return typedResp, err
-			}
-			return nil, err
-		}
-	}
-
-	// Call service method
-	var respContent *GetLandmarksByStateResponse
-	func() {
-		defer ensurePanicResponses(ctx, resp, s.hooks)
-		respContent, err = handler(ctx, reqContent)
-	}()
-
-	if err != nil {
-		s.writeError(ctx, resp, err)
-		return
-	}
-	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *GetLandmarksByStateResponse and nil error while calling GetLandmarksByState. nil responses are not supported"))
-		return
-	}
-
-	ctx = callResponsePrepared(ctx, s.hooks)
-
-	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
-	respBytes, err := marshaler.Marshal(respContent)
-	if err != nil {
-		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
-		return
-	}
-
-	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
-	resp.Header().Set("Content-Type", "application/json")
-	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
-	resp.WriteHeader(http.StatusOK)
-
-	if n, err := resp.Write(respBytes); err != nil {
-		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
-		twerr := twirp.NewError(twirp.Unknown, msg)
-		ctx = callError(ctx, s.hooks, twerr)
-	}
-	callResponseSent(ctx, s.hooks)
-}
-
-func (s *landmarkAPIServer) serveGetLandmarksByStateProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
-	var err error
-	ctx = ctxsetters.WithMethodName(ctx, "GetLandmarksByState")
-	ctx, err = callRequestRouted(ctx, s.hooks)
-	if err != nil {
-		s.writeError(ctx, resp, err)
-		return
-	}
-
-	buf, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
-		return
-	}
-	reqContent := new(GetLandmarksByStateRequest)
-	if err = proto.Unmarshal(buf, reqContent); err != nil {
-		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
-		return
-	}
-
-	handler := s.LandmarkAPI.GetLandmarksByState
-	if s.interceptor != nil {
-		handler = func(ctx context.Context, req *GetLandmarksByStateRequest) (*GetLandmarksByStateResponse, error) {
-			resp, err := s.interceptor(
-				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*GetLandmarksByStateRequest)
-					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*GetLandmarksByStateRequest) when calling interceptor")
-					}
-					return s.LandmarkAPI.GetLandmarksByState(ctx, typedReq)
-				},
-			)(ctx, req)
-			if resp != nil {
-				typedResp, ok := resp.(*GetLandmarksByStateResponse)
-				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*GetLandmarksByStateResponse) when calling interceptor")
-				}
-				return typedResp, err
-			}
-			return nil, err
-		}
-	}
-
-	// Call service method
-	var respContent *GetLandmarksByStateResponse
-	func() {
-		defer ensurePanicResponses(ctx, resp, s.hooks)
-		respContent, err = handler(ctx, reqContent)
-	}()
-
-	if err != nil {
-		s.writeError(ctx, resp, err)
-		return
-	}
-	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *GetLandmarksByStateResponse and nil error while calling GetLandmarksByState. nil responses are not supported"))
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *GetLandmarksByStateIDResponse and nil error while calling GetLandmarksByStateID. nil responses are not supported"))
 		return
 	}
 
@@ -1307,7 +1226,7 @@ func (s *landmarkAPIServer) serveCreateLandmarkJSON(ctx context.Context, resp ht
 
 	handler := s.LandmarkAPI.CreateLandmark
 	if s.interceptor != nil {
-		handler = func(ctx context.Context, req *CreateLandmarkRequest) (*google_protobuf1.Empty, error) {
+		handler = func(ctx context.Context, req *CreateLandmarkRequest) (*Landmark, error) {
 			resp, err := s.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
 					typedReq, ok := req.(*CreateLandmarkRequest)
@@ -1318,9 +1237,9 @@ func (s *landmarkAPIServer) serveCreateLandmarkJSON(ctx context.Context, resp ht
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*google_protobuf1.Empty)
+				typedResp, ok := resp.(*Landmark)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf1.Empty) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*Landmark) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -1329,7 +1248,7 @@ func (s *landmarkAPIServer) serveCreateLandmarkJSON(ctx context.Context, resp ht
 	}
 
 	// Call service method
-	var respContent *google_protobuf1.Empty
+	var respContent *Landmark
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
 		respContent, err = handler(ctx, reqContent)
@@ -1340,7 +1259,7 @@ func (s *landmarkAPIServer) serveCreateLandmarkJSON(ctx context.Context, resp ht
 		return
 	}
 	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *google_protobuf1.Empty and nil error while calling CreateLandmark. nil responses are not supported"))
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Landmark and nil error while calling CreateLandmark. nil responses are not supported"))
 		return
 	}
 
@@ -1388,7 +1307,7 @@ func (s *landmarkAPIServer) serveCreateLandmarkProtobuf(ctx context.Context, res
 
 	handler := s.LandmarkAPI.CreateLandmark
 	if s.interceptor != nil {
-		handler = func(ctx context.Context, req *CreateLandmarkRequest) (*google_protobuf1.Empty, error) {
+		handler = func(ctx context.Context, req *CreateLandmarkRequest) (*Landmark, error) {
 			resp, err := s.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
 					typedReq, ok := req.(*CreateLandmarkRequest)
@@ -1399,9 +1318,9 @@ func (s *landmarkAPIServer) serveCreateLandmarkProtobuf(ctx context.Context, res
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*google_protobuf1.Empty)
+				typedResp, ok := resp.(*Landmark)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf1.Empty) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*Landmark) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -1410,7 +1329,7 @@ func (s *landmarkAPIServer) serveCreateLandmarkProtobuf(ctx context.Context, res
 	}
 
 	// Call service method
-	var respContent *google_protobuf1.Empty
+	var respContent *Landmark
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
 		respContent, err = handler(ctx, reqContent)
@@ -1421,7 +1340,187 @@ func (s *landmarkAPIServer) serveCreateLandmarkProtobuf(ctx context.Context, res
 		return
 	}
 	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *google_protobuf1.Empty and nil error while calling CreateLandmark. nil responses are not supported"))
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *Landmark and nil error while calling CreateLandmark. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := proto.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *landmarkAPIServer) serveUpdateLandmark(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveUpdateLandmarkJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveUpdateLandmarkProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *landmarkAPIServer) serveUpdateLandmarkJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateLandmark")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	d := json.NewDecoder(req.Body)
+	rawReqBody := json.RawMessage{}
+	if err := d.Decode(&rawReqBody); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+	reqContent := new(UpdateLandmarkRequest)
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+
+	handler := s.LandmarkAPI.UpdateLandmark
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *UpdateLandmarkRequest) (*google_protobuf.Empty, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*UpdateLandmarkRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*UpdateLandmarkRequest) when calling interceptor")
+					}
+					return s.LandmarkAPI.UpdateLandmark(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*google_protobuf.Empty)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf.Empty) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *google_protobuf.Empty
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *google_protobuf.Empty and nil error while calling UpdateLandmark. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
+	respBytes, err := marshaler.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *landmarkAPIServer) serveUpdateLandmarkProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateLandmark")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
+		return
+	}
+	reqContent := new(UpdateLandmarkRequest)
+	if err = proto.Unmarshal(buf, reqContent); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	handler := s.LandmarkAPI.UpdateLandmark
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *UpdateLandmarkRequest) (*google_protobuf.Empty, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*UpdateLandmarkRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*UpdateLandmarkRequest) when calling interceptor")
+					}
+					return s.LandmarkAPI.UpdateLandmark(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*google_protobuf.Empty)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf.Empty) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *google_protobuf.Empty
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *google_protobuf.Empty and nil error while calling UpdateLandmark. nil responses are not supported"))
 		return
 	}
 
@@ -1487,7 +1586,7 @@ func (s *landmarkAPIServer) serveDeleteLandmarkJSON(ctx context.Context, resp ht
 
 	handler := s.LandmarkAPI.DeleteLandmark
 	if s.interceptor != nil {
-		handler = func(ctx context.Context, req *DeleteLandmarkRequest) (*google_protobuf1.Empty, error) {
+		handler = func(ctx context.Context, req *DeleteLandmarkRequest) (*google_protobuf.Empty, error) {
 			resp, err := s.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
 					typedReq, ok := req.(*DeleteLandmarkRequest)
@@ -1498,9 +1597,9 @@ func (s *landmarkAPIServer) serveDeleteLandmarkJSON(ctx context.Context, resp ht
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*google_protobuf1.Empty)
+				typedResp, ok := resp.(*google_protobuf.Empty)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf1.Empty) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf.Empty) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -1509,7 +1608,7 @@ func (s *landmarkAPIServer) serveDeleteLandmarkJSON(ctx context.Context, resp ht
 	}
 
 	// Call service method
-	var respContent *google_protobuf1.Empty
+	var respContent *google_protobuf.Empty
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
 		respContent, err = handler(ctx, reqContent)
@@ -1520,7 +1619,7 @@ func (s *landmarkAPIServer) serveDeleteLandmarkJSON(ctx context.Context, resp ht
 		return
 	}
 	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *google_protobuf1.Empty and nil error while calling DeleteLandmark. nil responses are not supported"))
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *google_protobuf.Empty and nil error while calling DeleteLandmark. nil responses are not supported"))
 		return
 	}
 
@@ -1568,7 +1667,7 @@ func (s *landmarkAPIServer) serveDeleteLandmarkProtobuf(ctx context.Context, res
 
 	handler := s.LandmarkAPI.DeleteLandmark
 	if s.interceptor != nil {
-		handler = func(ctx context.Context, req *DeleteLandmarkRequest) (*google_protobuf1.Empty, error) {
+		handler = func(ctx context.Context, req *DeleteLandmarkRequest) (*google_protobuf.Empty, error) {
 			resp, err := s.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
 					typedReq, ok := req.(*DeleteLandmarkRequest)
@@ -1579,9 +1678,9 @@ func (s *landmarkAPIServer) serveDeleteLandmarkProtobuf(ctx context.Context, res
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*google_protobuf1.Empty)
+				typedResp, ok := resp.(*google_protobuf.Empty)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf1.Empty) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*google_protobuf.Empty) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -1590,7 +1689,7 @@ func (s *landmarkAPIServer) serveDeleteLandmarkProtobuf(ctx context.Context, res
 	}
 
 	// Call service method
-	var respContent *google_protobuf1.Empty
+	var respContent *google_protobuf.Empty
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
 		respContent, err = handler(ctx, reqContent)
@@ -1601,7 +1700,187 @@ func (s *landmarkAPIServer) serveDeleteLandmarkProtobuf(ctx context.Context, res
 		return
 	}
 	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *google_protobuf1.Empty and nil error while calling DeleteLandmark. nil responses are not supported"))
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *google_protobuf.Empty and nil error while calling DeleteLandmark. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := proto.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *landmarkAPIServer) serveCreateState(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveCreateStateJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveCreateStateProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *landmarkAPIServer) serveCreateStateJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "CreateState")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	d := json.NewDecoder(req.Body)
+	rawReqBody := json.RawMessage{}
+	if err := d.Decode(&rawReqBody); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+	reqContent := new(CreateStateRequest)
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+
+	handler := s.LandmarkAPI.CreateState
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *CreateStateRequest) (*CreateStateResponse, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*CreateStateRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*CreateStateRequest) when calling interceptor")
+					}
+					return s.LandmarkAPI.CreateState(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*CreateStateResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*CreateStateResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *CreateStateResponse
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *CreateStateResponse and nil error while calling CreateState. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
+	respBytes, err := marshaler.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *landmarkAPIServer) serveCreateStateProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "CreateState")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
+		return
+	}
+	reqContent := new(CreateStateRequest)
+	if err = proto.Unmarshal(buf, reqContent); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	handler := s.LandmarkAPI.CreateState
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *CreateStateRequest) (*CreateStateResponse, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*CreateStateRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*CreateStateRequest) when calling interceptor")
+					}
+					return s.LandmarkAPI.CreateState(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*CreateStateResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*CreateStateResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *CreateStateResponse
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *CreateStateResponse and nil error while calling CreateState. nil responses are not supported"))
 		return
 	}
 
@@ -2203,38 +2482,42 @@ func callClientError(ctx context.Context, h *twirp.ClientHooks, err twirp.Error)
 }
 
 var twirpFileDescriptor0 = []byte{
-	// 525 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x95, 0x5b, 0x8b, 0xd3, 0x40,
-	0x14, 0xc7, 0x49, 0xdb, 0x6d, 0xdd, 0x13, 0x58, 0xd8, 0x59, 0xab, 0x43, 0x56, 0x96, 0x12, 0x04,
-	0xf7, 0x41, 0x13, 0x89, 0x97, 0x47, 0xd1, 0x5a, 0x91, 0x82, 0x0f, 0xb2, 0x45, 0x41, 0x5f, 0xca,
-	0x6c, 0x73, 0x0c, 0x61, 0x73, 0x19, 0x67, 0x12, 0xa5, 0x3e, 0x0a, 0x7e, 0x05, 0x3f, 0x84, 0xe0,
-	0x77, 0x94, 0xdc, 0xba, 0xb9, 0x6e, 0xe3, 0x5b, 0xe6, 0xcc, 0xf9, 0x9f, 0x39, 0xd3, 0xf3, 0xfb,
-	0x4f, 0xe1, 0x4c, 0xf0, 0x8d, 0xe9, 0xb1, 0xc0, 0xf6, 0x99, 0xb8, 0x7a, 0xc4, 0xb8, 0x6b, 0x4a,
-	0x14, 0xdf, 0xdc, 0x0d, 0x1a, 0x5c, 0x84, 0x51, 0x48, 0xa8, 0x83, 0x3f, 0x6c, 0xd7, 0x77, 0x42,
-	0x61, 0xc7, 0xbe, 0x51, 0x24, 0x32, 0xee, 0x6a, 0x67, 0x4e, 0x18, 0x3a, 0x1e, 0x9a, 0x69, 0xde,
-	0x65, 0xfc, 0xc5, 0xfc, 0x2e, 0x18, 0xe7, 0x28, 0x64, 0xa6, 0xd4, 0x4e, 0xeb, 0xfb, 0xe8, 0xf3,
-	0x68, 0x9b, 0x6d, 0xea, 0x7f, 0x14, 0x98, 0xbe, 0x16, 0xc8, 0x22, 0x7c, 0x97, 0x97, 0xbc, 0xc0,
-	0xaf, 0x31, 0xca, 0x88, 0xdc, 0x85, 0x49, 0x2c, 0x51, 0xac, 0x5d, 0x9b, 0x2a, 0x33, 0xe5, 0xfc,
-	0xf0, 0x62, 0x9c, 0x2c, 0x97, 0x36, 0x21, 0x30, 0x0a, 0x98, 0x8f, 0x74, 0x90, 0x46, 0xd3, 0xef,
-	0x24, 0x26, 0xbd, 0xd8, 0xa1, 0xc3, 0x2c, 0x96, 0x7c, 0x13, 0x0a, 0x13, 0x66, 0xdb, 0x02, 0xa5,
-	0xa4, 0xa3, 0x34, 0x5c, 0x2c, 0xc9, 0x6d, 0x38, 0x90, 0x11, 0x8b, 0x90, 0x1e, 0xa4, 0xf1, 0x6c,
-	0x41, 0x66, 0xa0, 0xda, 0x28, 0x37, 0xc2, 0xe5, 0x91, 0x1b, 0x06, 0x74, 0x9c, 0xee, 0x95, 0x43,
-	0xfa, 0x7d, 0x20, 0x6f, 0x31, 0xaa, 0x37, 0x7a, 0x04, 0x83, 0xe5, 0x22, 0xef, 0x71, 0xb0, 0x5c,
-	0xe8, 0x06, 0xd0, 0x52, 0xd6, 0x7c, 0xbb, 0xf2, 0x62, 0xa7, 0xc8, 0x2d, 0xfa, 0x54, 0xae, 0xfb,
-	0xd4, 0x2d, 0xd0, 0x4a, 0xf9, 0x72, 0xbe, 0x5d, 0x25, 0xed, 0x14, 0x8a, 0x5d, 0xaf, 0x4a, 0xa9,
-	0x57, 0x7d, 0x0d, 0xa7, 0xad, 0x1a, 0xc9, 0xc3, 0x40, 0x22, 0x79, 0x09, 0x87, 0xc5, 0x84, 0x24,
-	0x55, 0x66, 0xc3, 0x73, 0xd5, 0xd2, 0x8d, 0xae, 0x01, 0x1a, 0xbb, 0x0b, 0x5d, 0x8b, 0xf4, 0x07,
-	0x30, 0x5d, 0xa0, 0x87, 0xcd, 0xb1, 0xd4, 0x6f, 0xfb, 0x6b, 0x00, 0xd3, 0x0f, 0xdc, 0x66, 0x7b,
-	0x33, 0xc9, 0xe3, 0xd2, 0xdc, 0x54, 0xeb, 0x9e, 0x91, 0x61, 0x61, 0x14, 0x58, 0x18, 0xab, 0x48,
-	0xb8, 0x81, 0xf3, 0x91, 0x79, 0x31, 0xe6, 0x53, 0x7d, 0x51, 0x9d, 0xc8, 0xb0, 0x87, 0xb0, 0x2c,
-	0x20, 0xcf, 0xab, 0x04, 0xec, 0xd3, 0xee, 0xf8, 0xb0, 0xca, 0x7c, 0xec, 0x53, 0xe5, 0x13, 0xf9,
-	0xab, 0xc0, 0xad, 0xe2, 0x17, 0x68, 0x5c, 0xbd, 0xc4, 0xf2, 0xa0, 0x95, 0xe5, 0x61, 0x0b, 0xcb,
-	0xa3, 0x76, 0x96, 0x0f, 0x3a, 0x58, 0x1e, 0xdf, 0xc0, 0xf2, 0xa4, 0xc1, 0xb2, 0xf5, 0x7b, 0x04,
-	0x6a, 0xd1, 0xef, 0xab, 0xf7, 0x4b, 0xb2, 0x06, 0xb5, 0x44, 0x14, 0x79, 0xd8, 0x8d, 0x4b, 0xd3,
-	0x02, 0x5a, 0x0f, 0xb8, 0xc8, 0x15, 0x1c, 0x37, 0x6c, 0x41, 0xac, 0x5e, 0xc7, 0x54, 0x3c, 0xd4,
-	0xeb, 0xb0, 0x9f, 0x0a, 0x9c, 0xb4, 0x18, 0x84, 0x3c, 0xed, 0x75, 0x5e, 0xcd, 0x83, 0xda, 0xb3,
-	0xff, 0x54, 0xe5, 0x2e, 0xfc, 0x04, 0x47, 0xd5, 0xa7, 0x8d, 0x98, 0xdd, 0x85, 0x5a, 0x1f, 0x41,
-	0xed, 0x4e, 0x03, 0xbd, 0x37, 0xc9, 0xe3, 0x99, 0x94, 0xae, 0xda, 0xf3, 0xa6, 0xd2, 0xad, 0x46,
-	0xee, 0x2a, 0x3d, 0x3f, 0xf9, 0x7c, 0x6c, 0xd6, 0xff, 0x0b, 0x2e, 0xc7, 0x69, 0xd2, 0x93, 0x7f,
-	0x01, 0x00, 0x00, 0xff, 0xff, 0x4a, 0xb4, 0xc1, 0x9a, 0x26, 0x06, 0x00, 0x00,
+	// 581 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x55, 0x5f, 0x8f, 0x93, 0x4e,
+	0x14, 0x0d, 0xfd, 0xbb, 0x7b, 0x49, 0x9a, 0xfc, 0x66, 0xd3, 0x9f, 0x88, 0xeb, 0xda, 0x10, 0x13,
+	0xfb, 0xe0, 0x82, 0xa9, 0xb1, 0xbe, 0xf9, 0xa7, 0xd6, 0x98, 0x26, 0xfb, 0x60, 0xb6, 0xd1, 0x44,
+	0x5f, 0x36, 0xb3, 0xe5, 0x4a, 0x50, 0x0a, 0xe3, 0x0c, 0x68, 0xea, 0xa3, 0x4f, 0xfa, 0x19, 0xfc,
+	0x16, 0x7e, 0x42, 0xc3, 0x00, 0x5b, 0x28, 0x85, 0x45, 0xdf, 0x18, 0xee, 0xb9, 0x97, 0x7b, 0xe7,
+	0x9c, 0x73, 0x81, 0x13, 0xce, 0x56, 0x96, 0x47, 0x7d, 0x7b, 0x4d, 0xf9, 0xa7, 0x53, 0xca, 0x5c,
+	0x4b, 0x20, 0xff, 0xe2, 0xae, 0xd0, 0x64, 0x3c, 0x08, 0x03, 0xa2, 0x39, 0xf8, 0xcd, 0x76, 0xd7,
+	0x4e, 0xc0, 0xed, 0x68, 0x6d, 0x66, 0x40, 0xca, 0x5c, 0xfd, 0x96, 0x13, 0x04, 0x8e, 0x87, 0x96,
+	0xc4, 0x5d, 0x46, 0x1f, 0x2c, 0x5c, 0xb3, 0x70, 0x93, 0xa4, 0xe9, 0x27, 0xbb, 0xc1, 0xaf, 0x9c,
+	0x32, 0x86, 0x5c, 0x24, 0x71, 0xe3, 0x97, 0x02, 0xc3, 0x17, 0x1c, 0x69, 0x88, 0x67, 0x69, 0xc9,
+	0x73, 0xfc, 0x1c, 0xa1, 0x08, 0x09, 0x81, 0x8e, 0x4f, 0xd7, 0xa8, 0x29, 0x23, 0x65, 0x7c, 0x78,
+	0x2e, 0x9f, 0x89, 0x06, 0x7d, 0x6a, 0xdb, 0x1c, 0x85, 0xd0, 0x5a, 0xf2, 0x75, 0x76, 0x24, 0x37,
+	0xe1, 0x40, 0x84, 0x34, 0xc4, 0x0b, 0xd7, 0xd6, 0xda, 0x49, 0x48, 0x9e, 0x17, 0x36, 0x19, 0x81,
+	0x6a, 0xa3, 0x58, 0x71, 0x97, 0x85, 0x6e, 0xe0, 0x6b, 0x1d, 0x19, 0xcd, 0xbf, 0x22, 0x37, 0xa0,
+	0x1f, 0x09, 0xe4, 0x71, 0x6e, 0x57, 0x46, 0x7b, 0xf1, 0x71, 0x61, 0x1b, 0x77, 0x81, 0xbc, 0xc2,
+	0x70, 0xb7, 0xb3, 0x01, 0xb4, 0x16, 0xf3, 0xb4, 0xaf, 0xd6, 0x62, 0x6e, 0x98, 0xa0, 0xe5, 0x50,
+	0xb3, 0xcd, 0xd2, 0x8b, 0x9c, 0xdc, 0x14, 0xc2, 0x8b, 0x9c, 0x6c, 0x8a, 0xf8, 0xd9, 0x30, 0xe1,
+	0x38, 0x87, 0x17, 0xb3, 0xcd, 0x52, 0x76, 0x3a, 0xaf, 0xaa, 0x4f, 0xe1, 0x76, 0x05, 0x5e, 0xb0,
+	0xc0, 0x17, 0x48, 0x9e, 0xc1, 0x61, 0x46, 0x88, 0xd0, 0x94, 0x51, 0x7b, 0xac, 0x4e, 0x0c, 0xb3,
+	0x8a, 0x2f, 0xf3, 0x6a, 0x9c, 0x6d, 0x92, 0x71, 0x0f, 0x86, 0x73, 0xf4, 0xb0, 0xcc, 0xc2, 0x6e,
+	0x2f, 0x3f, 0x5b, 0x30, 0x7c, 0xc3, 0x6c, 0x7a, 0x2d, 0x92, 0x3c, 0x48, 0xf9, 0x8b, 0x89, 0x52,
+	0x27, 0xc7, 0x66, 0x22, 0x04, 0x33, 0x13, 0x82, 0xb9, 0x0c, 0xb9, 0xeb, 0x3b, 0x6f, 0xa9, 0x17,
+	0x61, 0xca, 0xee, 0x93, 0x22, 0x51, 0xed, 0x06, 0x89, 0x05, 0x1a, 0xa7, 0x5b, 0x75, 0x74, 0x1a,
+	0xe4, 0x5e, 0x69, 0x67, 0x0a, 0xa9, 0x56, 0xe6, 0x92, 0xfe, 0x6b, 0xf3, 0x52, 0xb0, 0x31, 0x06,
+	0x92, 0x48, 0x57, 0xf2, 0x51, 0xa3, 0x5b, 0xe3, 0x0c, 0x8e, 0x0a, 0xc8, 0x94, 0xb7, 0x47, 0xd0,
+	0x95, 0xb5, 0x24, 0x56, 0x9d, 0xdc, 0xa9, 0xe6, 0x2c, 0xc9, 0x4b, 0xd0, 0xc6, 0x6f, 0x05, 0x0e,
+	0xb2, 0xdb, 0x2f, 0x5d, 0x3b, 0xc9, 0x5d, 0x7b, 0x66, 0x9b, 0x4c, 0x84, 0xed, 0xad, 0x08, 0xf3,
+	0x56, 0xea, 0x54, 0x5b, 0xa9, 0x5b, 0x6b, 0xa5, 0x5e, 0xad, 0x95, 0xfa, 0x05, 0x2b, 0x3d, 0x85,
+	0xae, 0x1c, 0xe2, 0x5f, 0x1b, 0x9e, 0x7c, 0xef, 0x82, 0x9a, 0x4d, 0xfd, 0xfc, 0xf5, 0x82, 0x5c,
+	0x80, 0x9a, 0x73, 0x05, 0xb9, 0x5f, 0x7d, 0x79, 0x65, 0x0b, 0xeb, 0x0d, 0xec, 0x41, 0x7e, 0x28,
+	0x30, 0xdc, 0xeb, 0x3b, 0x32, 0x6d, 0xf4, 0xad, 0x92, 0xb1, 0xf5, 0xc7, 0x7f, 0x9d, 0x97, 0x0a,
+	0x05, 0x61, 0x50, 0x5c, 0x92, 0xc4, 0xaa, 0x2e, 0xb5, 0x77, 0x9d, 0x36, 0x9a, 0xf8, 0x1d, 0x0c,
+	0x8a, 0xde, 0xae, 0xfb, 0xcc, 0xde, 0x2d, 0xa0, 0xff, 0x5f, 0xb2, 0xce, 0xcb, 0xf8, 0x6f, 0x10,
+	0x97, 0x2e, 0x2e, 0x98, 0xba, 0xd2, 0x7b, 0x57, 0x51, 0x65, 0xe9, 0x8f, 0xa0, 0xe6, 0xcc, 0x55,
+	0x27, 0x84, 0xb2, 0x5b, 0xf5, 0xd3, 0x86, 0xe8, 0x84, 0x88, 0xd9, 0xd1, 0xfb, 0xff, 0xac, 0xdd,
+	0x1f, 0xe5, 0x65, 0x4f, 0x36, 0xf4, 0xf0, 0x4f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x64, 0x8f, 0xe9,
+	0x45, 0x43, 0x07, 0x00, 0x00,
 }

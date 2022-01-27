@@ -3,24 +3,24 @@ syntax = "proto3";
 package gezdimgordum.landmarkapi;
 option go_package = "/rpc/landmark-api";
 
-import "google/protobuf/wrappers.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
 
 service LandmarkAPI {
   rpc GetLandmark(GetLandmarkRequest) returns (Landmark);
-  rpc GetLandmarkBySlug(GetLandmarkBySlugRequest) returns (Landmark);
-  rpc GetLandmarksByState(GetLandmarksByStateRequest) returns (GetLandmarksByStateResponse);
-  rpc CreateLandmark(CreateLandmarkRequest) returns (google.protobuf.Empty);
+  rpc GetLandmarksByStateID(GetLandmarksByStateIDRequest) returns (GetLandmarksByStateIDResponse);
+  rpc CreateLandmark(CreateLandmarkRequest) returns (Landmark);
+  rpc UpdateLandmark(UpdateLandmarkRequest) returns (google.protobuf.Empty);
   rpc DeleteLandmark(DeleteLandmarkRequest) returns (google.protobuf.Empty);
+  rpc CreateState(CreateStateRequest) returns (CreateStateResponse);
 }
 
 message CreateLandmarkRequest {
-  string user_id = 1;
-  string name = 2;
-  string slug = 3;
-  string address = 4;
-  string state  = 5;
-  string description = 6;
+  string name = 1;
+  string address = 2;
+  string state_id = 3;
+  string description = 4;
+  string user_id = 5;
 }
 
 message GetLandmarkRequest {
@@ -31,11 +31,11 @@ message GetLandmarkBySlugRequest {
   string slug = 1;
 }
 
-message GetLandmarksByStateRequest {
-  string state = 1;
+message GetLandmarksByStateIDRequest {
+  string ID = 1;
 }
 
-message GetLandmarksByStateResponse {
+message GetLandmarksByStateIDResponse {
   repeated Landmark landmarks = 1;
 }
 
@@ -48,15 +48,29 @@ message UpdateLandmarkRequest {
   google.protobuf.StringValue name = 2;
   google.protobuf.StringValue description = 3;
   google.protobuf.StringValue address = 4;
-  google.protobuf.StringValue state = 5;
+  google.protobuf.StringValue stateID = 5;
+}
+
+message CreateStateRequest {
+  string name = 1;
+}
+
+message CreateStateResponse {
+   State state = 1;
 }
 
 message Landmark {
   string ID = 1;
-  string user_id = 2;
-  string name = 3;
-  string slug = 4;
-  string address = 5;
-  string state = 6;
-  string description = 7;
+  string name = 2;
+  string slug = 3;
+  string address = 4;
+  string state_id = 5;
+  string description = 6;
+  string user_id = 7;
+}
+
+message State {
+  string ID = 1;
+  string name = 2;
+  string slug = 3;
 }
