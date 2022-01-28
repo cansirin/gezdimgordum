@@ -8,11 +8,20 @@ import "google/protobuf/wrappers.proto";
 
 service LandmarkAPI {
   rpc GetLandmark(GetLandmarkRequest) returns (Landmark);
+  rpc GetAllLandmarks(google.protobuf.Empty) returns (GetAllLandmarksResponse);
   rpc GetLandmarksByStateID(GetLandmarksByStateIDRequest) returns (GetLandmarksByStateIDResponse);
   rpc CreateLandmark(CreateLandmarkRequest) returns (Landmark);
   rpc UpdateLandmark(UpdateLandmarkRequest) returns (google.protobuf.Empty);
   rpc DeleteLandmark(DeleteLandmarkRequest) returns (google.protobuf.Empty);
   rpc CreateState(CreateStateRequest) returns (CreateStateResponse);
+}
+
+message GetAllLandmarksRequest {
+
+}
+
+message GetAllLandmarksResponse {
+  repeated Landmark landmarks = 1;
 }
 
 message CreateLandmarkRequest {
