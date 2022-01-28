@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/gezdimgordum/landmark-api/internal/backend"
-	"github.com/gezdimgordum/landmark-api/internal/db"
-	"github.com/gezdimgordum/landmark-api/internal/models"
-	landmarkapi "github.com/gezdimgordum/landmark-api/rpc/landmark-api"
-	"github.com/gezdimgordum/landmark-api/server"
+	"github.com/cansirin/gezdimgordum/landmark-api/internal/backend"
+	"github.com/cansirin/gezdimgordum/landmark-api/internal/db"
+	"github.com/cansirin/gezdimgordum/landmark-api/internal/models"
+	api "github.com/cansirin/gezdimgordum/landmark-api/rpc/landmark-api"
+	"github.com/cansirin/gezdimgordum/landmark-api/server"
 	"github.com/rs/cors"
 	"log"
 	"net/http"
@@ -34,7 +34,7 @@ func main() {
 
 	s := server.NewLandmarkAPIServer(postgreSQLBackend)
 
-	twirpHandler := landmarkapi.NewLandmarkAPIServer(s)
+	twirpHandler := api.NewLandmarkAPIServer(s)
 
 	mux := http.NewServeMux()
 	mux.Handle(twirpHandler.PathPrefix(), twirpHandler)

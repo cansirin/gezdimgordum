@@ -1,6 +1,6 @@
 package server
 
-import "github.com/gezdimgordum/landmark-api/internal/backend"
+import "github.com/cansirin/gezdimgordum/landmark-api/internal/backend"
 
 type LandmarkAPIServer struct {
 	backend backend.Backender
