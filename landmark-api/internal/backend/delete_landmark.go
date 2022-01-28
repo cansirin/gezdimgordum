@@ -2,7 +2,7 @@ package backend
 
 import (
 	"context"
-	"github.com/gezdimgordum/landmark-api/internal/models"
+	"github.com/cansirin/gezdimgordum/landmark-api/internal/models"
 )
 
 func (b *PostgreSQLBackend) DeleteLandmark(ctx context.Context, id string) error {
