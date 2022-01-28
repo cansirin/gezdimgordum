@@ -2,7 +2,7 @@ package server
 
 import (
 	"context"
-	api "github.com/gezdimgordum/landmark-api/rpc/landmark-api"
+	api "github.com/cansirin/gezdimgordum/landmark-api/rpc/landmark-api"
 	"github.com/twitchtv/twirp"
 	"google.golang.org/protobuf/types/known/emptypb"
 )

@@ -2,7 +2,7 @@ package backend
 
 import (
 	"context"
-	"github.com/gezdimgordum/landmark-api/internal/models"
+	"github.com/cansirin/gezdimgordum/landmark-api/internal/models"
 	"gorm.io/gorm"
 )
 
