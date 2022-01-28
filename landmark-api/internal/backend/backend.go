@@ -12,6 +12,7 @@ type Backender interface {
 	DeleteLandmark(ctx context.Context, id string) error
 	UpdateLandmark(ctx context.Context, id string, name *string, description *string, address *string, stateID *string) error
 	GetLandmarksByStateID(ctx context.Context, id string) ([]*models.Landmark, error)
+	GetAllLandmarks(ctx context.Context) ([]*models.Landmark, error)
 
 	CreateState(ctx context.Context, name string) (*models.State, error)
 }
