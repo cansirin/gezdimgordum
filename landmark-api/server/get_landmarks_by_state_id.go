@@ -25,6 +25,11 @@ func (s *LandmarkAPIServer) GetLandmarksByStateID(ctx context.Context, req *api.
 			Address:     l.Address,
 			StateId:     l.StateID,
 			Description: l.Description,
+			State: &api.State{
+				ID:   l.State.ID.String(),
+				Name: l.State.Name,
+				Slug: l.State.Slug,
+			},
 		}
 		landmarks = append(landmarks, landmark)
 	}
