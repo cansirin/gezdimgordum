@@ -24,6 +24,11 @@ func (s LandmarkAPIServer) CreateLandmark(ctx context.Context, req *api.CreateLa
 		Description: landmark.Description,
 		StateId:     landmark.StateID,
 		UserId:      landmark.UserID,
+		State: &api.State{
+			ID:   landmark.State.ID.String(),
+			Name: landmark.Name,
+			Slug: landmark.Slug,
+		},
 	}, nil
 }
 
