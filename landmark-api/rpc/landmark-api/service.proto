@@ -76,6 +76,7 @@ message Landmark {
   string state_id = 5;
   string description = 6;
   string user_id = 7;
+  State state = 8;
 }
 
 message State {
