@@ -1,0 +1,18 @@
+type Landmark {
+    id: ID!
+    name: String!
+    slug: String!
+    description: String!
+    address: String!
+    state: String!
+
+    user: User!
+}
+
+input NewLandmark {
+    name: String!
+    description: String
+    address:String!
+    state: String!
+    userID: String!
+}

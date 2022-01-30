@@ -1,0 +1,28 @@
+# Building the binary of the App
+FROM cosmtrek/air:latest
+RUN mkdir -p /app
+WORKDIR /app
+COPY . .
+
+ENV PORT=8000
+
+EXPOSE 8000
+
+ENTRYPOINT ["/go/bin/air"]
+
+
+# RUN CGO_ENABLED=0 \
+#     GIT_TERMINAL_PROMPT=1 \
+#     GOOS=linux \
+#     GOARCH=amd64 \
+#     go build -o /bin/graphql /app/cmd/graphql/main.go
+#
+# # Moving the binary to the 'final Image' to make it smaller
+# FROM cosmtrek/air:latest
+# WORKDIR /app
+# RUN apk add --no-cache nano git curl
+# # COPY --from=builder /feedback-api/internal/configs/dev.env .env
+# COPY --from=builder bin/graphql graphql
+#
+# CMD ["./graphql"]
+#
