@@ -1,0 +1,20 @@
+type User {
+    id: ID!
+    name: String!
+
+    landmarks: [Landmark] #gqlgen:resolver
+}
+
+input RefreshTokenInput{
+    token: String!
+}
+
+input NewUser {
+    username: String!
+    password: String!
+}
+
+input Login {
+    username: String!
+    password: String!
+}
