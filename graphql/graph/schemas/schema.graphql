@@ -1,12 +1,12 @@
 type Query {
-    landmark(ID: ID!): Landmark
-    landmarks: [Landmark!]
-    landmarksByState(state: String!): [Landmark!]!
+    landmark(ID: ID!): Landmark!
+    landmarks: [Landmark]
+    landmarksByState(state: String!): [Landmark]
 }
 
 type Mutation {
-    createLandmark(input: NewLandmark!): Landmark
-    createUser(input: NewUser!): String
-    login(input: Login!): String
-    refreshToken(input: RefreshTokenInput): String
+    createLandmark(input: NewLandmark!): Landmark!
+    createUser(input: NewUser!): String!
+    login(input: Login!): String!
+    refreshToken(input: RefreshTokenInput): String!
 }

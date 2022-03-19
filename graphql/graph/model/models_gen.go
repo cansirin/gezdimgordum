@@ -9,6 +9,7 @@ type Landmark struct {
 	Description string `json:"description"`
 	Address     string `json:"address"`
 	State       string `json:"state"`
+	UserID      string `json:"userID"`
 	User        *User  `json:"user"`
 }
 
@@ -22,7 +23,6 @@ type NewLandmark struct {
 	Description *string `json:"description"`
 	Address     string  `json:"address"`
 	State       string  `json:"state"`
-	UserID      string  `json:"userID"`
 }
 
 type NewUser struct {
@@ -37,5 +37,6 @@ type RefreshTokenInput struct {
 type User struct {
 	ID        string      `json:"id"`
 	Name      string      `json:"name"`
+	Password  string      `json:"password"`
 	Landmarks []*Landmark `json:"landmarks"`
 }

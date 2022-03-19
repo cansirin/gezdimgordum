@@ -5,16 +5,17 @@ import (
 	"github.com/cansirin/gezdimgordum/graphql/internal/models"
 )
 
-func (b *PostgreSQLBackend) DeleteLandmark(ctx context.Context, id string) error {
-	landmark := models.Landmark{}
-	result := b.DB.First(&landmark, "id = ?", id)
-	if result.Error != nil {
-		return result.Error
+func (b *PostgreSQLBackend) DeleteLandmark(ctx context.Context, id string, userID string) error {
+	user := models.User{}
+
+	query := b.DB.First(&user, userID)
+	if query.Error != nil {
+		return query.Error
 	}
 
-	result = b.DB.Delete(&landmark)
-	if result.Error != nil {
-		return result.Error
+	err := b.DB.Model(&user).Association("Landmarks").Delete(user)
+	if err != nil {
+		return err
 	}
 
 	return nil

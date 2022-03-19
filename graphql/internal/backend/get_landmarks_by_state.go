@@ -8,7 +8,7 @@ import (
 func (b *PostgreSQLBackend) GetLandmarksByState(ctx context.Context, state string) ([]*models.Landmark, error) {
 	var landmarks []*models.Landmark
 
-	query := b.DB.Find(&landmarks, "state = ?", state)
+	query := b.DB.Preload("Users").Find(&landmarks, "state = ?", state)
 	if query.Error != nil {
 		return nil, query.Error
 	}

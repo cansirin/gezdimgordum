@@ -13,5 +13,10 @@ func (b *PostgreSQLBackend) GetLandmark(ctx context.Context, id string) (*models
 		return nil, query.Error
 	}
 
+	query = b.DB.Preload("Users").Find(&landmark)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+
 	return &landmark, nil
 }
