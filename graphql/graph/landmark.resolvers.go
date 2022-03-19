@@ -5,14 +5,19 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/cansirin/gezdimgordum/graphql/graph/generated"
+	"github.com/cansirin/gezdimgordum/graphql/graph/helper"
 	"github.com/cansirin/gezdimgordum/graphql/graph/model"
 )
 
 func (r *landmarkResolver) User(ctx context.Context, obj *model.Landmark) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	user, err := r.Backend.GetUser(ctx, obj.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	return helper.NewUserGQLModel(user), nil
 }
 
 // Landmark returns generated.LandmarkResolver implementation.

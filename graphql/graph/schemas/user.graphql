@@ -1,8 +1,9 @@
 type User {
     id: ID!
     name: String!
+    password: String!
 
-    landmarks: [Landmark] #gqlgen:resolver
+    landmarks: [Landmark]
 }
 
 input RefreshTokenInput{

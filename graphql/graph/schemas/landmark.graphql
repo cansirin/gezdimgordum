@@ -5,6 +5,7 @@ type Landmark {
     description: String!
     address: String!
     state: String!
+    userID: ID!
 
     user: User!
 }
@@ -14,5 +15,4 @@ input NewLandmark {
     description: String
     address:String!
     state: String!
-    userID: String!
 }

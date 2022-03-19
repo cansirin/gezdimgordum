@@ -16,9 +16,9 @@ func (b *PostgreSQLBackend) CreateLandmark(ctx context.Context, name string, des
 		UserID:      userID,
 	}
 
-	query := b.DB.Create(&landmark)
-	if query.Error != nil {
-		return nil, query.Error
+	result := b.DB.Create(&landmark)
+	if result.Error != nil {
+		return nil, result.Error
 	}
 
 	return &landmark, nil

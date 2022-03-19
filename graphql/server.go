@@ -5,6 +5,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/cansirin/gezdimgordum/graphql/graph"
 	"github.com/cansirin/gezdimgordum/graphql/graph/generated"
+	"github.com/cansirin/gezdimgordum/graphql/internal/auth"
 	"github.com/cansirin/gezdimgordum/graphql/internal/backend"
 	"github.com/cansirin/gezdimgordum/graphql/internal/db"
 	"github.com/cansirin/gezdimgordum/graphql/internal/models"
@@ -43,18 +44,17 @@ func main() {
 	postgreSQLBackend := backend.NewPostgreSQLBackend(dbClient)
 
 	router := chi.NewRouter()
+	router.Use(auth.Middleware(postgreSQLBackend))
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},
 		AllowCredentials: true,
 		Debug:            true,
+		//AllowedMethods:   []string{"GET", "POST", "OPTIONS", "HEAD"},
+		AllowedHeaders: []string{"Authorization", "Content-Type"},
 	}).Handler
 
 	router.Use(c)
-
-	if err != nil {
-		log.Fatalf("initializing clients: %s", err)
-	}
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{Backend: postgreSQLBackend}}))
 
